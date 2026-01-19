@@ -2,7 +2,6 @@ const User=require("../model/User.js")["User"]
 const bcrypt=require("bcryptjs")
 const path=require("path")
 const speakEasy=require("speakeasy")
-const QrCode=require("qrcode")
 const { getMongoDuplicateErrMsg } = require("../utils/getMongoDuplicateErrMsg.js")
 const { generateTokens } = require("../utils/generateTokens.js")
 const {sendEmailVerificationOtp}= require("../utils/sendEmailVerificationOtp.js")
@@ -53,6 +52,7 @@ exports.loginUser=async function(req,res){
            return res.json(400,{message:"Email or password is incorrect"})
         }
        const {is_valid,message}=await checkTrustedDeviceTokenStatus(req)
+       console.log(is_valid,message)
        if(is_valid){
         const {username,email:userEmail,_id:userId,avatar,createdAt,passkey_for_2FA}=user
         const {accessToken,refreshToken,accessTokenAge,refreshTokenAge}=await generateTokens({username,userEmail,userId})
@@ -61,6 +61,7 @@ exports.loginUser=async function(req,res){
         return res.json(200,{message:"Login done successfully",is_auth:true,userInfo})
        }
        const {challengeToken}=await sendEmailVerificationOtp(user,"LOGIN_2FA",{email:user.email,remember_me:req.body.remember_me})
+       console.log(challengeToken)
        res.json(401,{
         challengeToken,
         code: "2FA_REQUIRED",
@@ -99,7 +100,7 @@ exports.verifyOtp=async function(req,res){
     if(otpDoc.context==="EMAIL_VERIFY")await user.updateOne({is_email_verified:true})
     if(otpDoc.context==="LOGIN_2FA" && remember_me){
         const {trusted_device_token_age,trusted_device_token}=await generateTrustedDeviceToken(email)
-        res.cookie("trusted_device_token",trusted_device_token,{httpOnly:true,maxAge:trusted_device_token_age,secure:false})
+        res.cookie("trusted_device_token",trusted_device_token,{httpOnly:true,maxAge:trusted_device_token_age,secure:process.env.BUILD=="prod"})
     }
     const {username,email:userEmail,_id:userId,avatar,createdAt,passkey_for_2FA}=user
     const userInfo={username,email:userEmail,userId,avatar,createdAt,is_2FA_enabled:passkey_for_2FA?true:false}
