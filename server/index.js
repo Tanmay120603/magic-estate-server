@@ -1,9 +1,11 @@
 const mongoose=require("mongoose")
 const express=require("express")
 const http=require("http")
+const cors=require("cors")
 const {Server}=require("socket.io")
 const cookieParser=require("cookie-parser")
 const path = require("path")
+const { verifyToken } = require("./middleware/verifyToken.js")
 const AuthRouter=require("./routes/auth.js")["router"]
 const UserRouter=require("./routes/user.js")["router"]
 const PostRouter=require("./routes/post.js")["router"]
@@ -14,12 +16,17 @@ require("dotenv").config()
 
 const server=express()
 const httpServer=http.createServer(server)
-const io=new Server(httpServer)
+const io=new Server(httpServer,{cors:{
+  origin:process.env.FRONTEND_URL,
+  methods:"GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+  credentials:true
+}})
 
+server.use(cors({origin:process.env.FRONTEND_URL,methods:"GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",credentials:true}))
 server.use(express.json())
 server.use(cookieParser())
 server.use("/api/auth",AuthRouter)
-server.use("/api/users",UserRouter)
+server.use("/api/user",verifyToken,UserRouter)
 server.use("/api/posts",PostRouter)
 server.use("/api/chats",ChatRouter)
 server.use("/api/messages",MessageRouter)

@@ -1,5 +1,4 @@
 const {Schema,model}=require("mongoose")
-const uniqueValidator = require('mongoose-unique-validator')
 
 const UserSchema=Schema({
     username:{type:String,required:true,unique:true,minlength:3,maxlength:32},
@@ -9,14 +8,14 @@ const UserSchema=Schema({
         },
         message:"Email is not valid"
     }},
-    password:{type:String,required:true,minlength:6},
+    password:{type:String,minlength:6},
+    is_email_verified:{type:Boolean,default:false},
+    passkey_for_2FA:{type:String,default:null}, 
     avatar:{type:String,default:"https://w7.pngwing.com/pngs/205/731/png-transparent-default-avatar-thumbnail.png"},
     Posts:{type:[Schema.Types.ObjectId],ref:"Post"},
     savedPost:{type:[Schema.Types.ObjectId],ref:"Post"},
-    createdAt:{type:Number,default:Date.now()}
+    createdAt:{type:Date,default:Date.now()}
 })
-
-UserSchema.plugin(uniqueValidator,{ message: '{PATH} is already taken.' })
 
 const User=model("User",UserSchema)
 

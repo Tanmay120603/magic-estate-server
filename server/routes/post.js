@@ -4,7 +4,6 @@ const { verifyToken } = require("../middleware/verifyToken")
 
 const router=express.Router()
 
-router.post("/",verifyToken,createPost).get("/",getPosts).get("/autocomplete",autocompleteSearch).get("/:id",getPost)
-
+router.post("/",verifyToken,createPost).get("/",getPosts).get("/autocomplete",autocompleteSearch).get("/:postId",getPost)
 
 exports.router=router

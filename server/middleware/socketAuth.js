@@ -1,14 +1,13 @@
 const cookie=require("cookie")
-const jwt=require("jsonwebtoken")
+const {verifyAuthTokens}=require("../utils/verifyAuthTokens.js")
 
-function socketAuth(socket,next){
-const jsonCookie=cookie.parse(socket.handshake.headers.cookie || "")
-if(!jsonCookie?.token)next(new Error("Token not found please login"))
-
-  jwt.verify(jsonCookie.token,process.env.JWT_SECRET_KEY,(err,payload)=>{
-    if(err)next(new Error("Invalid token"))
-      next()
-  })
+async function socketAuth(socket,next){
+  const jsonCookie=cookie.parse(socket.handshake.headers.cookie || "")
+  const {accessToken,refreshToken}=jsonCookie
+  const {is_auth,payload}=await verifyAuthTokens("socketAuth",accessToken,refreshToken)
+  if(!is_auth)return next(new Error("Authentication error. Unauthenticated user!"))
+  socket.auth=payload
+  next()
 }
 
 exports.socketAuth=socketAuth
