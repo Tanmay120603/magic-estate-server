@@ -3,7 +3,7 @@ require("dotenv").config()
 
 exports.checkTrustedDeviceTokenStatus=async function(req){
     try{
-    const {trusted_device_token}=req.cookies
+    const {trusted_device_token}=req.cookies || ""
     if(!trusted_device_token)return {is_valid:false,message:"Token doesn't exist"}
     const promise=new Promise((resolve,reject)=>{
         jwt.verify(trusted_device_token,process.env.TRUSTED_DEVICE_TOKEN_SECRET_KEY,(err,payload)=>{
