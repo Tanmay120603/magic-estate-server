@@ -10,7 +10,7 @@ async function sendEmailVerificationOtp(user,otpContext,challengeTokenExtraPaylo
         const otp=Math.floor(Math.random()*1000000)
         const sessionId=crypto.randomUUID()
         const challengeToken=await promiseBasedSignToken({sessionId,otpContext,...challengeTokenExtraPayload},{expiresIn:"5m"},process.env.TWOFA_EMAIL_TOKEN_SECRET_KEY)
-
+        console.log("Send email -->",challengeToken,process.env.EMAIL_FROM)
         await transporter.sendMail({
             from:process.env.EMAIL_FROM,
             to:user.email,
