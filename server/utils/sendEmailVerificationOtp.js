@@ -7,10 +7,9 @@ require("dotenv").config()
 
 async function sendEmailVerificationOtp(user,otpContext,challengeTokenExtraPayload){
    try{
-        const otp=Math.floor(Math.random()*1000000)
+        const otp = Math.floor(100000 + Math.random() * 900000)
         const sessionId=crypto.randomUUID()
         const challengeToken=await promiseBasedSignToken({sessionId,otpContext,...challengeTokenExtraPayload},{expiresIn:"5m"},process.env.TWOFA_EMAIL_TOKEN_SECRET_KEY)
-        console.log("Send email -->",challengeToken,process.env.EMAIL_FROM)
         await transporter.sendMail({
             from:process.env.EMAIL_FROM,
             to:user.email,

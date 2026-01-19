@@ -52,7 +52,6 @@ exports.loginUser=async function(req,res){
            return res.json(400,{message:"Email or password is incorrect"})
         }
        const {is_valid,message}=await checkTrustedDeviceTokenStatus(req)
-       console.log(is_valid,message)
        if(is_valid){
         const {username,email:userEmail,_id:userId,avatar,createdAt,passkey_for_2FA}=user
         const {accessToken,refreshToken,accessTokenAge,refreshTokenAge}=await generateTokens({username,userEmail,userId})
@@ -61,7 +60,6 @@ exports.loginUser=async function(req,res){
         return res.json(200,{message:"Login done successfully",is_auth:true,userInfo})
        }
        const {challengeToken}=await sendEmailVerificationOtp(user,"LOGIN_2FA",{email:user.email,remember_me:req.body.remember_me})
-       console.log(challengeToken)
        res.json(401,{
         challengeToken,
         code: "2FA_REQUIRED",
