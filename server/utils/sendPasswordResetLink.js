@@ -1,4 +1,5 @@
-const { transporter } = require("../config/emailTransporter")
+const { gmail} = require("../config/gmailClient")
+const { buildEmail } = require("./buildEmail")
 const { promiseBasedSignToken } = require("./promiseBasedSignToken")
 require("dotenv").config()
 
@@ -16,18 +17,17 @@ exports.sendPasswordResetLink=async function(user){
        redirect_url=redirect_url+"/reset-password?"
     }
    
-    const tokenSearchParams=new URLSearchParams({challengeToken:token})    
-    await transporter.sendMail({
-     from:process.env.EMAIL_FROM,
-     to:user.email,
-     subject:"Password Reset",
-     html:`<h1>Hi ${username}</h1>
-        <a href=${redirect_url+tokenSearchParams} style="display: inline-block; padding: 10px 20px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #4CAF50; text-decoration: none; border-radius: 5px; margin-top: 20px; text-align: center;">Reset password</a>
-        `
-    })
+    const tokenSearchParams=new URLSearchParams({challengeToken:token})
+    
+    const raw=buildEmail({to:user.email,subject:"Password Reset",html:`<h1>Hi ${username}</h1>
+           <a href=${redirect_url+tokenSearchParams} style="display: inline-block; padding: 10px 20px; font-size: 16px; font-weight: bold; color: #ffffff; background-color: #4CAF50; text-decoration: none; border-radius: 5px; margin-top: 20px; text-align: center;">Reset password</a>`})
+
+    await gmail.users.messages.send({userId:"me",requestBody:{raw}})
+
     return {message:"Please check your email. If the address exists, we’ve sent an link."}
     }
     catch(err){
+        console.log(err)
         throw new Error("Something went wrong while sending reset email")
     }
 
