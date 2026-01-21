@@ -144,6 +144,7 @@ exports.forgotPassword=async function(req,res){
         const {email}=req.body
         const user=await User.findOne({email:email||""})
         if(!user)return res.json(404,{message:"User not found linked to this email"})
+        if(!user.password)return res.json(400,{message:"This account doesn’t use a password. Please sign in using Google."}) 
         const {message}=await sendPasswordResetLink(user)
         res.json(200,{message})       
     } 
